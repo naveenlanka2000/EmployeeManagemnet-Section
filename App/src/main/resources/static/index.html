@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        form input, form button {
+            margin: 5px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        form button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
+        form button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Employee Management</h1>
+
+    <form id="employeeForm">
+        <h2>Add Employee</h2>
+        <input type="text" id="name" placeholder="Name" required>
+        <input type="text" id="position" placeholder="Position" required>
+        <input type="number" id="salary" placeholder="Salary" required>
+        <button type="submit">Add Employee</button>
+    </form>
+
+    <h2>Employee List</h2>
+    <table id="employeeTable">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Position</th>
+            <th>Salary</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Employee rows will be added here dynamically -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    const apiUrl = 'http://localhost:8080/api/employees';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchEmployees();
+    });
+
+    document.getElementById('employeeForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const name = document.getElementById('name').value;
+        const position = document.getElementById('position').value;
+        const salary = parseFloat(document.getElementById('salary').value);
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, position, salary })
+            });
+
+            if (response.ok) {
+                fetchEmployees();
+                document.getElementById('employeeForm').reset();
+            } else {
+                console.error('Error adding employee:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error adding employee:', error);
+        }
+    });
+
+    async function fetchEmployees() {
+        try {
+            const response = await fetch(apiUrl);
+            const employees = await response.json();
+
+            const tableBody = document.querySelector('#employeeTable tbody');
+            tableBody.innerHTML = '';
+
+            employees.forEach(employee => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${employee.id}</td>
+                    <td>${employee.name}</td>
+                    <td>${employee.position}</td>
+                    <td>${employee.salary}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Error fetching employees:', error);
+        }
+    }
+</script>
+</body>
+</html>
